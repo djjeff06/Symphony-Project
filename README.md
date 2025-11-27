@@ -23,17 +23,19 @@ This project is part of our deliverables for the course of Machine Learning (CSI
 3. Training a new model using the extracted dataset:
    'python training.py data_path model_name mode'
 
-   Note:
-   'data_path': path containing training file (e.g., project/dataset)
-   'model_name': name of the trained model (no file extension needed) (e.g., best_model)
+   <p>Note:<br>
+   'data_path': path containing training file (e.g., project/dataset)<br>
+   'model_name': name of the trained model (no file extension needed) (e.g., best_model)<br>
    'mode': 'composer_era', 'composer', 'era' -> choose which label(s) to predict
+   </p>
    
 4. For hyperparameter tuning, change the values in model_configs.py.
 
 5. To run inference on test data:
    'python inference.py data_path model_name mode'
    
-   Note:
-   'data_path': path containing test file (e.g., project/dataset)
-   'model_name': name of the trained model (no file extension needed, include path if needed) (e.g., best_model, models/best_model)
+   <p>Note:<br>
+   'data_path': path containing test file (e.g., project/dataset)<br>
+   'model_name': name of the trained model (no file extension needed, include path if needed) (e.g., best_model, models/best_model)<br>
    'mode': 'composer_era', 'composer', 'era' -> choose which label(s) to predict
+   </p>
