@@ -109,3 +109,24 @@ class SymphonyClassifier(nn.Module):
         x = x.mean(dim=1)
         era_out = self.fc_era(x)
         return era_out
+    
+    def get_embeddings(self, x, device="cpu"):
+        """
+        Extract penultimate embeddings (before classification heads).
+        Returns the averaged transformer output.
+        """
+        x = self.embedding(x)
+
+        if device is not None:
+            seq_len = x.size(1)
+            n_embedding = x.size(2)
+            positional_encoding = compute_positional_encoding(seq_len, n_embedding, device=device)
+            x = x + positional_encoding
+
+        for encoder in self.transformer_encoders:
+            x, _ = encoder(x)
+
+        # This is the penultimate embedding
+        embeddings = x.mean(dim=1)
+        
+        return embeddings

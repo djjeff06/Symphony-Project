@@ -186,6 +186,59 @@ def standardize_to_np(dataset):
         composer_to_id,
         era_to_id
     )
+    
+def standardize_to_np_with_metadata(dataset):
+    """
+    Extended version that also tracks composition IDs for each chunk (for better visualization).
+    """
+    # Extract unique classes
+    all_composers = sorted(list({item["composer"] for item in dataset}))
+    all_eras = sorted(list({item["era"] for item in dataset}))
+
+    composer_to_id = {c: i for i, c in enumerate(all_composers)}
+    era_to_id = {e: i for i, e in enumerate(all_eras)}
+
+    print("Composer IDs:", composer_to_id)
+    print("Era IDs:", era_to_id)
+
+    X_chunks = []
+    y_composer = []
+    y_era = []
+    composition_ids = []  # Tracks which composition each chunk belongs to
+    composition_names = []  # Tracks composition filenames
+    
+    # Assign unique composition ID to each item
+    for comp_id, item in enumerate(dataset):
+        comp_label = composer_to_id[item["composer"]]
+        era_label = era_to_id[item["era"]]
+        comp_name = item["file"]
+
+        for chunk in item["tokens"]:
+            chunk = chunk.astype(np.float32)
+
+            # Standardize per chunk
+            mean = chunk.mean()
+            std = chunk.std() + 1e-9
+            chunk = (chunk - mean) / std
+
+            X_chunks.append(chunk)
+            y_composer.append(comp_label)
+            y_era.append(era_label)
+            composition_ids.append(comp_id)  # New
+            composition_names.append(comp_name)  # New
+
+    # Convert to numpy
+    X = np.stack(X_chunks)
+
+    return (
+        X,
+        np.array(y_composer, dtype=np.int64),
+        np.array(y_era, dtype=np.int64),
+        np.array(composition_ids, dtype=np.int64),  # New
+        composition_names,  # New
+        composer_to_id,
+        era_to_id
+    )
 
 def preprocess():
     dataset = load_dataset("Symphonies")
@@ -194,11 +247,27 @@ def preprocess():
     with open("dataset_capped.pkl", "wb") as f:
         pickle.dump(dataset_capped, f)
     '''
-    X_pad, y_composer, y_era, composer_to_id, era_to_id = standardize_to_np(dataset_capped)
+    #X_pad, y_composer, y_era, composer_to_id, era_to_id = standardize_to_np(dataset_capped)
+    X_pad, y_composer, y_era, comp_ids, comp_names, composer_to_id, era_to_id = standardize_to_np_with_metadata(dataset_capped)
 
     print("X_pad shape:", X_pad.shape)
     print("y_composer shape:", y_composer.shape)
     print("y_era shape:", y_era.shape)
+    print("Number of unique compositions:", len(set(comp_ids)))
+    
+    # Save metadata for visualization
+    metadata = {
+        'composition_ids': comp_ids,
+        'composition_names': comp_names,
+        'composer_to_id': composer_to_id,
+        'era_to_id': era_to_id
+    }
+    
+    with open("dataset_metadata.pkl", "wb") as f:
+        pickle.dump(metadata, f)
+    
+    print("Saved metadata to dataset_metadata.pkl")
+
 
 if __name__ == "__main__":
     preprocess()

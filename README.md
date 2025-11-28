@@ -39,3 +39,25 @@ This project is part of our deliverables for the course of Machine Learning (CSI
    'model_name': name of the trained model (no file extension needed, include path if needed) (e.g., best_model, models/best_model)<br>
    'mode': 'composer_era', 'composer', 'era' -> choose which label(s) to predict
    </p>
+
+6. To visualize embeddings from a trained model:
+   'python visualization.py data_path model_name mode [data_split] [method]'
+   
+   <p>Note:<br>
+   'data_path': path containing data file (e.g., project/dataset)<br>
+   'model_name': name of the trained model (no file extension needed) (e.g., best_model)<br>
+   'mode': 'composer_era', 'composer', 'era' -> must match the model's training mode<br>
+   'data_split': (optional) 'train' or 'test' (default: 'test')<br>
+   'method': (optional) 'umap' or 'tsne' (default: 'umap')<br>
+   </p>
+   
+   Examples:
+   - 'python visualization.py project/dataset best_model composer_era test umap'
+   - 'python visualization.py project/dataset best_model composer train tsne'
+   
+   The script will generate visualization plots in the 'visualizations/' folder:
+   - Chunk-level embeddings colored by composer and era
+   - Composition-level embeddings colored by composer and era
+   
+   <p>Note: For best results, ensure you've run preprocessing with the updated 
+   'standardize_to_np_with_metadata' function to generate dataset_metadata.pkl</p>
