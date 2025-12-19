@@ -37,13 +37,28 @@ Our Multi-Task Learning (MTL) framework outperforms the Single-Task Learning (ST
 
 ## Instructions
 
-1. Download the dataset: https://www.space.ntu.edu.tw/navigate/a/#/s/7BDECE88F1184391AF062D5383E3B5686BL
-
-2. Install project dependencies: 
+1. Install project dependencies: 
    'pip install -r requirements.txt' 
    or ensure all packages listed in requirements.txt are installed in your environment.
+
+2. Prepare the Dataset - Due to copyright and storage limitations, the raw audio files are not included. Please acquire the recordings for the composers listed in our paper and organize them into the following directory structure:
+Symphonies/
+├── [Era Name]/             # e.g., Baroque
+│   ├── [Composer Name]/    # e.g., Bach
+│   │   ├── track1.mp3
+│   │   └── ...
    
-3. Training a new model using the extracted dataset:
+3. Preprocessing - Convert raw audio to Log-Mel token patches and generate metadata:
+   'python preprocessing.py'
+   
+   <p>Outputs:<br>
+   processed_data.npz: The tensors used for training/inference (not included in repo due to size).<br>
+   dataset_metadata.pkl: The class mappings and IDs.<br>
+   </p>
+
+⚠️ Consistency Note: We have included our original dataset_metadata.pkl in this repository. If you are preparing your own dataset to test our pre-trained model, ensure your Symphonies/ folder structure matches ours (same Era/Composer names) so that the generated Class IDs match the weights in best_model.pth.
+   
+4. Training a new model using the extracted dataset:
    'python training.py data_path model_name mode'
 
    <p>Note:<br>
@@ -52,9 +67,9 @@ Our Multi-Task Learning (MTL) framework outperforms the Single-Task Learning (ST
    'mode': 'composer_era', 'composer', 'era' -> choose which label(s) to predict
    </p>
    
-4. For hyperparameter tuning, change the values in model_configs.py.
+5. For hyperparameter tuning, change the values in model_configs.py.
 
-5. To run inference on test data:
+6. To evaluate the model and reproduce the accuracy results on the test set:
    'python inference.py data_path model_name mode'
    
    <p>Note:<br>
@@ -64,7 +79,7 @@ Our Multi-Task Learning (MTL) framework outperforms the Single-Task Learning (ST
    The saved model weights are included in model/ of the repository.
    </p>
 
-6. To visualize embeddings from a trained model:
+7. To visualize embeddings from a trained model:
    'python visualization.py data_path model_name mode [data_split] [method]'
    
    <p>Note:<br>
