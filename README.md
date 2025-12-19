@@ -1,10 +1,12 @@
-# 🎵 Team 27: Composer & Era Classification with Multi-Task Transformers
+# 🎵 Team 27: Multi-Task Learning for Joint Composer and Musical Era Classification in Classical Music
 
 > **Course Project:** Machine Learning (CSIE5043) @ National Taiwan University
 
 This repository contains the implementation of a **Transformer-based multi-task framework** designed to jointly classify classical music composers and their corresponding musical eras from short composition snippets.
 
-![Model Architecture](figures/model_architecture.png)
+<p align="center">
+  <img src="figures/model_architecture.png" alt="Model Architecture" width="85%">
+</p>
 
 ## 📝 Abstract
 
