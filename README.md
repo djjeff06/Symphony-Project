@@ -10,8 +10,6 @@ This project is part of our deliverables for the course of Machine Learning (CSI
 - CPU: Any modern multi-core processor
 - Python: 3.10.12 (ensure dependencies are installed)
 
-> Note: For inference/testing, a GPU is recommended but not strictly required.
-
 ## Instructions
 
 1. Download the dataset: https://www.space.ntu.edu.tw/navigate/a/#/s/7BDECE88F1184391AF062D5383E3B5686BL

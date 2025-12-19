@@ -17,7 +17,10 @@ def set_random_seeds(random_seed = 15):
     np.random.seed(random_seed)
 
 def train(model, train_loader, val_loader, criterion, optimizer, scheduler=None, device="cpu", n_epochs=20, model_name="best_model", task="composer_era"):
-    best_val_loss = float('inf')
+    best_val_acc = 0
+    alpha = 1.5
+    beta  = 1.0
+    current_accuracy = 0
     
     for epoch in range(n_epochs):
         model.train()
@@ -38,7 +41,10 @@ def train(model, train_loader, val_loader, criterion, optimizer, scheduler=None,
             composer_loss = criterion(composer_output, composer_labels) if composer_output is not None else torch.tensor(0.0, device=device)
             era_loss = criterion(era_output, era_labels) if era_output is not None else torch.tensor(0.0, device=device)
 
-            train_loss = composer_loss + era_loss
+            if task == "composer_era":
+                train_loss = alpha* composer_loss + beta* era_loss
+            else:
+                train_loss = composer_loss + era_loss
 
             optimizer.zero_grad()
             train_loss.backward()
@@ -58,18 +64,25 @@ def train(model, train_loader, val_loader, criterion, optimizer, scheduler=None,
             "val_loss": val_loss,
             "learning_rate": optimizer.param_groups[0]['lr']
         }
-        if val_acc_composer is not None:
-            log_dict["val_composer_acc"] = val_acc_composer
         if val_acc_era is not None:
             log_dict["val_era_acc"] = val_acc_era
+            current_accuracy = val_acc_era
+        if val_acc_composer is not None:
+            log_dict["val_composer_acc"] = val_acc_composer
+            current_accuracy = val_acc_composer
 
         wandb.log(log_dict)
 
         # Save best model
-        if val_loss < best_val_loss:
-            best_val_loss = val_loss
+        if current_accuracy > best_val_acc:
+            best_val_acc = current_accuracy
             torch.save(model.state_dict(), model_name+".pth")
-            print(f"Saved best model at epoch {epoch+1} with val_loss: {val_loss:.4f}")
+            if task == "composer_era":
+                print(f"Saved best model at epoch {epoch+1} with val_composer_acc: {val_acc_composer:.4f} and val_era_acc: {val_acc_era:.4f}")
+            elif task == "composer":
+                print(f"Saved best model at epoch {epoch+1} with val_composer_acc: {val_acc_composer:.4f}")
+            else:
+                print(f"Saved best model at epoch {epoch+1} with val_era_acc: {val_acc_era:.4f}")
 
         if scheduler is not None:
             scheduler.step(val_loss)
@@ -99,8 +112,8 @@ def val(model, val_loader, criterion, device="cpu", task="composer_era"):
 
             composer_loss = criterion(composer_output, composer_labels) if composer_output is not None else torch.tensor(0.0, device=device)
             era_loss = criterion(era_output, era_labels) if era_output is not None else torch.tensor(0.0, device=device)
-
             total_loss = composer_loss + era_loss
+
             val_loss += total_loss.item()
 
             # Compute accuracy
@@ -120,6 +133,7 @@ def val(model, val_loader, criterion, device="cpu", task="composer_era"):
 
     return val_loss / len(val_loader), val_acc_composer, val_acc_era
 
+'''
 class AugmentedDataset(Dataset):
     """
     X: A feature tensor of shape (N, T, D)
@@ -170,6 +184,7 @@ class AugmentedDataset(Dataset):
             x[start:start+mask_len, :] = 0.0
 
         return x
+    '''
 
 def main(folder_path, model_name, mode):
     wandb.init(
@@ -206,6 +221,7 @@ def main(folder_path, model_name, mode):
 
     # Create Datasets
     # Only the training dataset uses augment=True
+    '''
     train_dataset = AugmentedDataset(
         X_train_tensor, y_composer_train_tensor, y_era_train_tensor,
         augment=True
@@ -214,10 +230,13 @@ def main(folder_path, model_name, mode):
         X_val_tensor, y_composer_val_tensor, y_era_val_tensor,
         augment=False
     )
+    '''
 
+    train_dataset = TensorDataset(X_train_tensor, y_composer_train_tensor, y_era_train_tensor)
+    val_dataset   = TensorDataset(X_val_tensor, y_composer_val_tensor, y_era_val_tensor)
 
     # Create DataLoaders
-    batch_size = 64
+    batch_size = config.batch_size
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     val_loader   = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 
@@ -234,13 +253,15 @@ def main(folder_path, model_name, mode):
     wandb.watch(model, log="all")
 
     criterion = nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=config.lr)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=config.lr)
+    '''
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
             optimizer, mode='min', factor=0.5, patience=10, min_lr=1e-6
         )
+    '''
     n_epochs = config.epochs
 
-    train(model, train_loader, val_loader, criterion, optimizer, scheduler, device, n_epochs, model_name, task=mode)
+    train(model, train_loader, val_loader, criterion, optimizer, None, device, n_epochs, model_name, task=mode)
 
 if __name__ == "__main__":
     if not (len(sys.argv) == 4 or len(sys.argv) == 5):
