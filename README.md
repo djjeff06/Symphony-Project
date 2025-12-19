@@ -42,11 +42,7 @@ Our Multi-Task Learning (MTL) framework outperforms the Single-Task Learning (ST
    or ensure all packages listed in requirements.txt are installed in your environment.
 
 2. Prepare the Dataset - Due to copyright and storage limitations, the raw audio files are not included. Please acquire the recordings for the composers listed in our paper and organize them into the following directory structure:
-Symphonies/
-├── [Era Name]/             # e.g., Baroque
-│   ├── [Composer Name]/    # e.g., Bach
-│   │   ├── track1.mp3
-│   │   └── ...
+Symphonies/[Era Name]/[Composer Name]/[Audio Files] (e.g., Symphonies/Baroque/Bach/track1.mp3).
    
 3. Preprocessing - Convert raw audio to Log-Mel token patches and generate metadata:
    'python preprocessing.py'
