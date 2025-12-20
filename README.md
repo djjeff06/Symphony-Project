@@ -36,7 +36,6 @@ Our Multi-Task Learning (MTL) framework outperforms the Single-Task Learning (ST
 - Python: 3.10.12 (ensure dependencies are installed)
 
 ## Instructions
-
 1. Install project dependencies: 
    'pip install -r requirements.txt' 
    or ensure all packages listed in requirements.txt are installed in your environment.
@@ -48,7 +47,8 @@ Symphonies/[Era Name]/[Composer Name]/[Audio Files] (e.g., Symphonies/Baroque/Ba
    'python preprocessing.py'
    
    <p>Outputs:<br>
-   processed_data.npz: The tensors used for training/inference (not included in repo due to size).<br>
+   train-test/train.npz: The processed training tensors.<br>
+   train-test/test.npz: The processed test tensors.<br>
    dataset_metadata.pkl: The class mappings and IDs.<br>
    </p>
 

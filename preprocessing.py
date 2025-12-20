@@ -6,6 +6,7 @@ import random
 from collections import defaultdict
 import pickle
 import sys
+from sklearn.model_selection import train_test_split
 
 def audio_to_tokens(
     path,
@@ -250,10 +251,36 @@ def preprocess():
     #X_pad, y_composer, y_era, composer_to_id, era_to_id = standardize_to_np(dataset_capped)
     X_pad, y_composer, y_era, comp_ids, comp_names, composer_to_id, era_to_id = standardize_to_np_with_metadata(dataset_capped)
 
-    print("X_pad shape:", X_pad.shape)
-    print("y_composer shape:", y_composer.shape)
-    print("y_era shape:", y_era.shape)
-    print("Number of unique compositions:", len(set(comp_ids)))
+    X_train, X_test, y_composer_train, y_composer_test, y_era_train, y_era_test = train_test_split(
+        X_pad, 
+        y_composer, 
+        y_era, 
+        test_size=0.2,        # 20% test
+        random_state=15, 
+        stratify=y_composer    # stratify by composer
+    )
+
+    # Create folder if it doesn't exist
+    save_dir = "train-test"
+    os.makedirs(save_dir, exist_ok=True)
+
+    # Save training set
+    np.savez_compressed(
+        os.path.join(save_dir, "train.npz"),
+        X=X_train,
+        y_composer=y_composer_train,
+        y_era=y_era_train
+    )
+
+    # Save test set
+    np.savez_compressed(
+        os.path.join(save_dir, "test.npz"),
+        X=X_test,
+        y_composer=y_composer_test,
+        y_era=y_era_test
+    )
+
+    print(f"Saved train and test datasets to '{save_dir}' folder.")
     
     # Save metadata for visualization
     metadata = {
